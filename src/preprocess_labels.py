@@ -8,6 +8,7 @@ import math
 import numpy as np
 from datasets import load_dataset, Dataset
 from pathlib import Path
+from typing import Optional
 
 
 def c_eps(eps: float) -> float:
@@ -131,5 +132,3 @@ def prepare_tldr(
     return ds
 
 
-# Allow Optional import
-from typing import Optional
