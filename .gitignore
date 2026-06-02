@@ -1,0 +1,10 @@
+checkpoints/
+data/
+results/
+*.pyc
+__pycache__/
+.env
+*.arrow
+*.jsonl
+wandb/
+.DS_Store
