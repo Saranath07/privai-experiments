@@ -101,7 +101,7 @@ def main(args):
     train_cfg = get_training_config(eps, model_size=args.model_size)
     output_dir = Path(args.output_dir) / run
 
-    os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+    os.environ["PYTORCH_ALLOC_CONF"] = "expandable_segments:True"
 
     dpo_config = DPOConfig(
         output_dir=str(output_dir),
@@ -112,8 +112,7 @@ def main(args):
         eval_strategy="epoch",
         load_best_model_at_end=True,
         seed=args.seed,
-        max_length=1024,        # cap sequence length — HH-RLHF has very long convos
-        max_prompt_length=512,
+        max_length=1024,
         **train_cfg,
     )
 
@@ -124,6 +123,7 @@ def main(args):
         train_dataset=train_ds,
         eval_dataset=eval_ds,
         processing_class=tokenizer,
+        max_prompt_length=512,  # trainer arg, not config
         eps=eps,
         R_max=args.R_max,
     )
