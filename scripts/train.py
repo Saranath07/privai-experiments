@@ -151,5 +151,8 @@ if __name__ == "__main__":
     parser.add_argument("--output_dir", default="checkpoints")
     parser.add_argument("--results_dir",default="results")
     parser.add_argument("--wandb",      action="store_true")
+    parser.add_argument("--gpu",        default=None, help="CUDA device id(s), e.g. '1' or '1,2'")
     args = parser.parse_args()
+    if args.gpu is not None:
+        os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
     main(args)

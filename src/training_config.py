@@ -24,9 +24,10 @@ def get_training_config(eps: float, model_size: str = "4b") -> dict:
       grad_accum ∝ c(ε)²  (capped)  — reduces variance toward clean-DPO level
       warmup     increases with flip rate — stable direction before committing
     """
+    # A100 80GB: can fit much larger batches than originally estimated
     base_lr    = {"4b": 5e-7, "12b": 2e-7}.get(model_size, 5e-7)
-    base_accum = {"4b": 4,    "12b": 8   }.get(model_size, 4)
-    batch_size = {"4b": 4,    "12b": 2   }.get(model_size, 4)
+    base_accum = {"4b": 2,    "12b": 4   }.get(model_size, 2)   # lower: bigger batch absorbs this
+    batch_size = {"4b": 8,    "12b": 4   }.get(model_size, 8)   # bumped up for 80GB VRAM
 
     ce = c_eps(eps)
     flip_rate = 0.0 if eps == float("inf") else 1 / (math.exp(eps) + 1)
