@@ -10,7 +10,8 @@ git pull
 pip install -r requirements.txt
 huggingface-cli login
 wandb login
-export OPENAI_API_KEY=sk-...
+# Only needed for final 8 paper runs (Sonnet judge). Skip for all dev runs.
+# export ANTHROPIC_API_KEY=sk-ant-...
 ```
 
 ## Workflow
