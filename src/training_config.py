@@ -32,17 +32,18 @@ def get_training_config(eps: float, model_size: str = "4b") -> dict:
     ce = c_eps(eps)
     flip_rate = 0.0 if eps == float("inf") else 1 / (math.exp(eps) + 1)
 
-    warmup_ratio = 0.03 + 0.15 * flip_rate
+    # warmup_steps: more warmup at small ε (high noise) for stable early gradient direction
+    warmup_steps = int(50 + 200 * flip_rate)   # 50 steps clean → ~145 steps at ε=0.1
 
     return {
         "learning_rate":                base_lr / ce,
         "gradient_accumulation_steps":  min(int(base_accum * ce ** 2), 32),
-        "warmup_ratio":                 warmup_ratio,   # TRL <0.9 still accepts this
+        "warmup_steps":                 warmup_steps,
         "lr_scheduler_type":            "cosine",
         "max_grad_norm":                1.0,
-        "num_train_epochs":             3,   # free under post-processing property
+        "num_train_epochs":             3,
         "per_device_train_batch_size":  batch_size,
         "bf16":                         True,
         "gradient_checkpointing":       True,
-        "remove_unused_columns":        False,  # keep noisy_label column
+        "remove_unused_columns":        False,
     }
