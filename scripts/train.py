@@ -56,19 +56,25 @@ def main(args):
     run = run_name(eps, args.alpha, args.mode, args.model_size, args.seed)
     print(f"\n{'='*60}\nRun: {run}\n{'='*60}")
 
-    # Load dataset from disk (must have been built by prepare_datasets.py)
+    # Load dataset — always use the full saved dataset, slice after loading
     eps_str = "inf" if eps == float("inf") else str(eps)
-    n_str   = f"_n{args.n_samples}" if args.n_samples else ""
-    tag     = f"eps{eps_str}_alpha{args.alpha}_{args.mode}_n{args.n_samples or 'full'}_seed{args.seed}"
-    data_path = Path(args.data_dir) / f"hh_rlhf_{tag}"
 
-    if not data_path.exists():
+    # Find the saved dataset for this (eps, alpha, mode) combo regardless of n suffix
+    data_dir = Path(args.data_dir)
+    prefix = f"hh_rlhf_eps{eps_str}_alpha{args.alpha}_{args.mode}_"
+    matches = sorted(data_dir.glob(f"{prefix}*_seed{args.seed}"))
+
+    if not matches:
         raise FileNotFoundError(
-            f"Dataset not found at {data_path}.\n"
+            f"No dataset found in {data_dir} matching '{prefix}*_seed{args.seed}'.\n"
             f"Run: python scripts/prepare_datasets.py --output_dir {args.data_dir}"
         )
+    data_path = matches[-1]  # take the largest (full) dataset
+    print(f"Loading dataset from {data_path}")
 
     dataset = load_from_disk(str(data_path))
+    if args.n_samples:
+        dataset = dataset.select(range(min(args.n_samples, len(dataset))))
     split = dataset.train_test_split(test_size=0.05, seed=args.seed)
     train_ds, eval_ds = split["train"], split["test"]
     print(f"Train: {len(train_ds)} | Eval: {len(eval_ds)}")
