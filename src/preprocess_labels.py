@@ -105,12 +105,14 @@ def prepare_tldr(
     """Same as prepare_hh_rlhf but for TL;DR summarization dataset."""
     np.random.seed(seed)
 
-    ds = load_dataset("openai/summarize_from_feedback", "comparisons", split="train")
+    # trl-lib/tldr is the maintained mirror of openai/summarize_from_feedback
+    # Fields: prompt, chosen, rejected (already split into pairs)
+    ds = load_dataset("trl-lib/tldr", split="train")
     if n_samples:
         ds = ds.select(range(min(n_samples, len(ds))))
 
-    # TL;DR: choice field is 0 or 1 indicating which summary is preferred
-    labels = np.array(ds["choice"], dtype=int)
+    # trl-lib/tldr has chosen/rejected columns — chosen is always preferred (label=1)
+    labels = np.ones(len(ds), dtype=int)
 
     if mode == "CTL":
         labels = huber_corruption(labels, alpha).astype(int)
