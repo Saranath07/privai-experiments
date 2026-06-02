@@ -86,14 +86,14 @@ def main(args):
     tokenizer.pad_token = tokenizer.eos_token
 
     model = AutoModelForCausalLM.from_pretrained(
-        model_id, torch_dtype="bfloat16", device_map="auto"
+        model_id, dtype=torch.bfloat16, device_map="auto"
     )
     model = get_peft_model(model, LORA_CONFIG)
     model.print_trainable_parameters()
 
     # Reference model (frozen base, no LoRA)
     ref_model = AutoModelForCausalLM.from_pretrained(
-        model_id, torch_dtype="bfloat16", device_map="auto"
+        model_id, dtype=torch.bfloat16, device_map="auto"
     )
 
     # Training config
@@ -118,7 +118,7 @@ def main(args):
         args=dpo_config,
         train_dataset=train_ds,
         eval_dataset=eval_ds,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         eps=eps,
         R_max=args.R_max,
     )
